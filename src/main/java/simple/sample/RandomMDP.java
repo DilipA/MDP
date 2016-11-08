@@ -1,4 +1,4 @@
-package sample;
+package simple.sample;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,13 +9,13 @@ import java.util.Random;
 
 import com.google.common.collect.HashBasedTable;
 
-import MDP.Action;
-import MDP.MDP;
-import MDP.State;
-import MDP.exceptions.MDPException;
+import simple.MDP.Action;
+import simple.MDP.MDP;
+import simple.MDP.State;
+import simple.MDP.exceptions.MDPException;
 
 /**
- * This class implements functionality to sample MDP from distribution RandomMDP
+ * This class implements functionality to simple.sample simple.MDP from distribution RandomMDP
  * as defined in Jiang et al.
  * 
  * @author Enrique Areyan Viqueira

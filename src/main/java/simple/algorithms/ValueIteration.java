@@ -1,21 +1,21 @@
-package algorithms;
+package simple.algorithms;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import MDP.Action;
-import MDP.MDP;
-import MDP.State;
+import simple.MDP.Action;
+import simple.MDP.MDP;
+import simple.MDP.State;
 
 /**
- * This class implements Value Iteration in an MDP and a Gamma.
+ * This class implements Value Iteration in an simple.MDP and a Gamma.
  * 
  * @author Enrique Areyan Viqueira
  */
 public class ValueIteration {
 
 	/**
-	 * Value iteration runs in an MDP.
+	 * Value iteration runs in an simple.MDP.
 	 */
 	private final MDP mdp;
 	
@@ -56,7 +56,7 @@ public class ValueIteration {
 	}
 
 	/**
-	 * Implements VI in this MDP.
+	 * Implements VI in this simple.MDP.
 	 */
 	public void run() {
 		int i = 0;
@@ -64,7 +64,7 @@ public class ValueIteration {
 		// Convergence criteria are: (1) number of iterations and (2) difference of absolute values.
 		while (i < maxIter && !convergence) {
 			convergence = true;
-			// For each state of the MDP.
+			// For each state of the simple.MDP.
 			for (State state : this.mdp.getStates()) {
 				double maxSum = Double.NEGATIVE_INFINITY;
 				// Compute the value of the action with the highest expected reward.

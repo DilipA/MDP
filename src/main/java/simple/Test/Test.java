@@ -1,16 +1,16 @@
-package Test;
+package simple.Test;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
 import com.google.common.collect.HashBasedTable;
 
-import MDP.Action;
-import MDP.MDP;
-import MDP.State;
-import MDP.exceptions.MDPException;
-import algorithms.ValueIteration;
-import sample.RandomMDP;
+import simple.MDP.Action;
+import simple.MDP.MDP;
+import simple.MDP.State;
+import simple.MDP.exceptions.MDPException;
+import simple.algorithms.ValueIteration;
+import simple.sample.RandomMDP;
 
 /**
  * Testing class
@@ -25,6 +25,7 @@ public class Test {
 		State s1 = new State("State 1");
 		State s2 = new State("State 2");
 		Action a1 = new Action("Action 1");
+
 		
 		HashSet<State> states = new HashSet<State>();
 		states.add(s1);
@@ -84,7 +85,7 @@ public class Test {
 		r2.put(s2, 0.44);
 		rewards.put(s2, a1, r2);	
 
-		MDP testMDP = new MDP(states, actions, transition, rewards);
+		simple.MDP testMDP = new simple.MDP(states, actions, transition, rewards);
 		System.out.println(testMDP.getReward(s1, s2, a1));
 		System.out.println(testMDP.getTransition(s1, s2, a1));
 		

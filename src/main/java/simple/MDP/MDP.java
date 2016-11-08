@@ -1,21 +1,22 @@
-package MDP;
+package simple.MDP;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import com.google.common.collect.Table;
 
-import MDP.exceptions.MDPException;
+import simple.MDP.exceptions.MDPException;
 
 /**
- * This class represents an MDP.
+ * This class represents an simple.MDP.
  * 
  * @author Enrique Areyan Viqueira
  */
 public class MDP {
 
 	/**
-	 * An MDP is composed of States.
+	 * An simple.MDP is composed of States.
 	 */
 	private final Set<State> states;
 
@@ -33,6 +34,11 @@ public class MDP {
 	 * Transition from one state to another yields a reward.
 	 */
 	private final Table<State, Action, Map<State, Double>> reward;
+
+	/**
+	 * Amount of noise to add to true reward signal
+	 */
+	private final double rewardNoise;
 
 	/**
 	 * Constructor. 
@@ -66,7 +72,7 @@ public class MDP {
 			}
 		}
 		this.reward = reward;
-
+		this.rewardNoise = 0.1;
 	}
 	
 	/**
@@ -90,7 +96,7 @@ public class MDP {
 	 * @return the reward obtained from being in state sFrom, taking action a and landing in sTo.
 	 */
 	public double getReward(State sFrom, State sTo, Action a) {
-		return this.reward.get(sFrom, a).get(sTo);
+		return this.reward.get(sFrom, a).get(sTo) + new Random().nextGaussian()*this.rewardNoise;
 	}
 	
 	/**

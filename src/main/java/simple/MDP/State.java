@@ -1,11 +1,11 @@
-package MDP;
+package simple.MDP;
 
 /**
- * Represents an action in an MDP.
+ * Represents a state in an simple.MDP.
  * 
  * @author Enrique Areyan Viqueira
  */
-public class Action {
+public class State {
 
 	/**
 	 * Internal representation Id. Could be whatever the implementing client wants.
@@ -15,16 +15,16 @@ public class Action {
 	/**
 	 * Constructor.
 	 * 
-	 * @param id - a string identifying this action.
+	 * @param id - a string identifying this state.
 	 */
-	public Action(String id) {
+	public State(String id) {
 		this.id = id;
 	}
 
 	/**
 	 * Getter.
 	 * 
-	 * @return this action identification string.
+	 * @return this state identification string.
 	 */
 	public String getId() {
 		return this.id;
@@ -34,5 +34,4 @@ public class Action {
 	public String toString() {
 		return this.getId();
 	}
-
 }

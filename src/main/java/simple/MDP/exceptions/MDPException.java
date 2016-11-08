@@ -1,7 +1,7 @@
-package MDP.exceptions;
+package simple.MDP.exceptions;
 
 /**
- * Exception thrown in the MDP package.
+ * Exception thrown in the simple.MDP package.
  * 
  * @author Enrique Areyan Viqueira
  */
