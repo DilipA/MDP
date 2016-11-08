@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 public class DataGenerator {
 
     public static Trajectory generateTrajectory(int length, MDP mdp){
-        Trajectory ret = new Trajectory();
+        Trajectory ret = new Trajectory(mdp.getStates(), mdp.getActions());
         State current = mdp.getRandomState();
         ret.intialize(current);
         while(ret.getLength() < length){
