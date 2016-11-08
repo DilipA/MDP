@@ -101,6 +101,7 @@ public class ExperimentRunner {
         for(Integer n : nVals){
             for(Double gamma : gammas){
                 results.put(n, gamma, results.get(n, gamma) / numDatasets);
+                System.out.println(n + "\t" + gamma + "\t" + results.get(n, gamma) / numDatasets);
             }
         }
         System.out.println(results);
