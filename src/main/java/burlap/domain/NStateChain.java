@@ -68,6 +68,7 @@ public class NStateChain implements DomainGenerator {
         //Pick initial state uniformly at random
         State start = tenChain.getRandomStartState();
 
+        //TODO: Find out how to make GraphStateNode work with HashableStateFactory
         System.out.println(new SimpleHashableStateFactory().hashState(start));
         System.exit(0);
 
