@@ -52,9 +52,10 @@ public class RandomMDP {
 		HashBasedTable<State, Action, Map<State, Double>> rewards = HashBasedTable.create();
 		for (State sFrom : states) {
 			for (Action a : actions) {
-				HashMap<State, Double> r = new HashMap<State, Double>();
+				HashMap<State, Double> r = new HashMap<>();
+				double reward = randomGenerator.nextDouble();
 				for (State sTo : states) {
-					r.put(sTo, randomGenerator.nextDouble());
+					r.put(sTo, reward);
 				}
 				rewards.put(sFrom, a, r);
 			}
