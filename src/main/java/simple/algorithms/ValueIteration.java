@@ -84,7 +84,7 @@ public class ValueIteration {
 				for (Action action : this.mdp.getActions()) {
 					double sum = 0.0;
 					for(State sprime : this.mdp.getStates()) {
-						sum += this.mdp.getTransition(state, sprime, action) * (this.mdp.getReward(state, sprime, action) + this.gamma * this.V.get(state));
+						sum += this.mdp.getTransition(state, sprime, action) * (this.mdp.getReward(state, sprime, action) + this.gamma * this.V.get(sprime));
 					}
 					this.Q.put(state, action, sum);
 					if(sum > maxSum) {
@@ -127,6 +127,10 @@ public class ValueIteration {
 			this.P.put(s, maxActions.get(tie));
 		}
 	}
+
+	public Map<State, Action> getPolicy(){
+	    return this.P;
+    }
 
 	@Override
 	public String toString() {
