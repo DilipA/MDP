@@ -1,7 +1,6 @@
 package simple.experiment.full;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import simple.MDP.MDP;
 import simple.MDP.State;
@@ -13,8 +12,11 @@ import simple.experiment.data.DataGenerator;
 import simple.experiment.model_based.MDPEstimator;
 import simple.sample.RandomMDP;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,10 @@ import java.util.Map;
  */
 public class ExperimentRunner {
 
+    public static void runFigure1() throws MDPException {
+
+    }
+
     public static void runFigure3() throws MDPException {
 
         long startTime = System.currentTimeMillis();
@@ -30,7 +36,7 @@ public class ExperimentRunner {
         //Draw a single MDP from RandomMDP
         MDP randomMDP = RandomMDP.sample();
 
-        Table<Integer, Double, Double> results = HashBasedTable.create();
+        Table<Integer, Double, List<Double>> results = HashBasedTable.create();
 
         List<Integer> nVals = new ArrayList<>();
         nVals.add(5);
@@ -51,7 +57,7 @@ public class ExperimentRunner {
         gammas.add(0.9);
         gammas.add(0.99);
 
-        int numDatasets = 15;
+        int numDatasets = 1000;
 
         for(Integer n : nVals){
             System.out.println("Running on " + n + " trajectories of length 10");
@@ -87,20 +93,33 @@ public class ExperimentRunner {
 
                     double empiricalLoss = sumDiff / randomMDP.getStates().size();
                     if(results.get(n, gamma) == null){
-                        results.put(n, gamma, 0.0);
+                        results.put(n, gamma, new ArrayList<>());
                     }
-                    results.put(n, gamma, empiricalLoss + results.get(n, gamma));
+                    results.get(n, gamma).add(empiricalLoss);
                 }
             }
         }
 
-        for(Integer n : nVals){
-            for(Double gamma : gammas){
-                results.put(n, gamma, results.get(n, gamma) / numDatasets);
-                System.out.println(n + "\t" + gamma + "\t" + results.get(n, gamma) / numDatasets);
+//        for(Integer n : nVals){
+//            for(Double gamma : gammas){
+//                results.put(n, gamma, results.get(n, gamma));
+//                System.out.println(n + "\t" + gamma + "\t" + results.get(n, gamma));
+//            }
+//        }
+//        System.out.println(results);
+
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(new File("out/figure3_results.csv")))){
+            bw.write("Trajectories, gamma, loss\n");
+            for(Integer n : nVals){
+                for(Double gamma : gammas){
+                    for(Double loss : results.get(n, gamma)){
+                        bw.write(n + "," + gamma + "," + loss + "\n");
+                    }
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        System.out.println(results);
 
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
