@@ -1,11 +1,13 @@
 package simple.MDP;
 
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 
+import org.apache.commons.math3.distribution.EnumeratedDistribution;
+import org.apache.commons.math3.util.Pair;
 import simple.MDP.exceptions.MDPException;
 
 /**
@@ -115,6 +117,31 @@ public class MDP {
 	 */
 	public Set<Action> getActions() {
 		return this.actions;
+	}
+
+	/**
+	 * Produce a state uniformly at random from all the states of this MDP
+	 * @return A state sampled uniformly at random from the state space
+	 */
+	public State getRandomState(){
+		List<State> allStates = Lists.newArrayList(this.states);
+		return allStates.get(new Random().nextInt(allStates.size()));
+	}
+
+	/**
+	 * Produce an action uniformly at random from all the actions of this MDP
+	 * @return An action sampled uniformly at random from the action space
+	 */
+	public Action getRandomAction(){
+		List<Action> allActions = Lists.newArrayList(this.actions);
+		return allActions.get(new Random().nextInt(allActions.size()));
+	}
+
+	public State sampleTransition(State s, Action a){
+		List<Pair<State, Double>> pmf = this.transition.get(s, a).entrySet().stream()
+				.map(e -> new Pair<>(e.getKey(), e.getValue())).collect(Collectors.toList());
+		EnumeratedDistribution<State> transition = new EnumeratedDistribution<>(pmf);
+		return transition.sample();
 	}
 
 	@Override

@@ -139,7 +139,6 @@ public class ValueIteration {
 			for (Action a : this.mdp.getActions()){
 				ret += "\n\t Q(" + s.getId() + "," + a.getId() + ") = " + this.Q.get(s,a);
 			}
-
 		}
 
 		ret += "\n\n Policy:";
