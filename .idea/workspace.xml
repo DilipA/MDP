@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7773b6a5-363c-4de6-8a4b-cf6e3246f45d" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/simple/algorithms/PolicyEvaluation.java" afterPath="$PROJECT_DIR$/src/main/java/simple/algorithms/PolicyEvaluation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/simple/algorithms/ValueIteration.java" afterPath="$PROJECT_DIR$/src/main/java/simple/algorithms/ValueIteration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java" afterPath="$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java" />
     </list>
     <ignored path="MDP.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -119,8 +118,8 @@
       <file leaf-file-name="ExperimentRunner.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="101" column="39" selection-start-line="101" selection-start-column="39" selection-end-line="101" selection-end-column="39" />
+            <state relative-caret-position="270">
+              <caret line="39" column="0" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -597,7 +596,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="69" y="24" width="1851" height="1056" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -859,8 +858,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="101" column="39" selection-start-line="101" selection-start-column="39" selection-end-line="101" selection-end-column="39" />
+        <state relative-caret-position="270">
+          <caret line="39" column="0" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

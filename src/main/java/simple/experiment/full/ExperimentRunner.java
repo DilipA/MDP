@@ -40,14 +40,21 @@ public class ExperimentRunner {
 
         List<Double> gammas = new ArrayList<>();
         gammas.add(0.0);
-        for (double i = 0.1; i < 0.99; i += 0.1) {
-            gammas.add(i);
-        }
+        gammas.add(0.1);
+        gammas.add(0.2);
+        gammas.add(0.3);
+        gammas.add(0.4);
+        gammas.add(0.5);
+        gammas.add(0.6);
+        gammas.add(0.7);
+        gammas.add(0.8);
+        gammas.add(0.9);
         gammas.add(0.99);
 
         int numDatasets = 1000;
 
         for(Integer n : nVals){
+            System.out.println("Running for trajectories of length 5");
             List<List<Trajectory>> datasets = new ArrayList<>();
             while(datasets.size() != numDatasets){
                 List<Trajectory> trajectories = DataGenerator.generateNTrajectories(n, 5, randomMDP);
@@ -58,6 +65,7 @@ public class ExperimentRunner {
                 MDP estimatedMDP = estimator.getMdp();
 
                 for (Double gamma : gammas) {
+                    System.out.println("Running for gamma = " + gamma);
                     double gammaEval = 0.99;
 
                     ValueIteration vi1 = new ValueIteration(randomMDP, gammaEval);
