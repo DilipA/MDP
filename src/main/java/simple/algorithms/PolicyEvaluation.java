@@ -88,7 +88,7 @@ public class PolicyEvaluation {
             }
             i++;
         }
-        System.out.println("Number of iters = " + i);
+        //System.out.println("Number of iters = " + i);
     }
 
     public Map<State, Double> getValueFunction(){

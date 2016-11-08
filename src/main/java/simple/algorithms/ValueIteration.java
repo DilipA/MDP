@@ -102,7 +102,7 @@ public class ValueIteration {
 			}
 			i++;
 		}
-		System.out.println("Number of iters = " + i);
+//		System.out.println("Number of iters = " + i);
 	}
 
 	/**
