@@ -54,13 +54,9 @@ public class ExperimentRunner {
         int numDatasets = 1000;
 
         for(Integer n : nVals){
-            System.out.println("Running for trajectories of length 5");
-            List<List<Trajectory>> datasets = new ArrayList<>();
-            while(datasets.size() != numDatasets){
-                List<Trajectory> trajectories = DataGenerator.generateNTrajectories(n, 5, randomMDP);
-                datasets.add(trajectories);
-            }
-            for(List<Trajectory> dataset : datasets) {
+            System.out.println("Running for trajectories of length " + n);
+            for(int i=0;i < numDatasets;i++) {
+                List<Trajectory> dataset = DataGenerator.generateNTrajectories(n, 5, randomMDP);
                 MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
                 MDP estimatedMDP = estimator.getMdp();
 
