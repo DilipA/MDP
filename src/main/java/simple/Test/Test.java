@@ -105,11 +105,12 @@ public class Test {
 		System.out.println("----\n" + randomMDP);
 		ValueIteration vi = new ValueIteration(randomMDP, 0.99);
 		vi.run();
+		vi.computePolicy();
 		System.out.println(vi);
 
 		vi = new ValueIteration(randomMDP, 0.5);
 		vi.run();
+		vi.computePolicy();
 		System.out.println(vi);
-
 	}
 }
