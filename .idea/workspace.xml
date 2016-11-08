@@ -2,11 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7773b6a5-363c-4de6-8a4b-cf6e3246f45d" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/burlap/domain/NStateChain.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/burlap/domain/NStateChainRF.class" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/burlap/domain/NStateChain.java" afterPath="$PROJECT_DIR$/src/main/java/burlap/domain/NStateChain.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/burlap/domain/NStateChainRF.java" afterPath="$PROJECT_DIR$/src/main/java/burlap/domain/NStateChainRF.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java" afterPath="$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java" />
     </list>
     <ignored path="MDP.iws" />
@@ -95,8 +90,8 @@
       <file leaf-file-name="ExperimentRunner.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1593">
-              <caret line="108" column="17" selection-start-line="108" selection-start-column="17" selection-end-line="108" selection-end-column="17" />
+            <state relative-caret-position="207">
+              <caret line="64" column="84" selection-start-line="64" selection-start-column="84" selection-end-line="64" selection-end-column="84" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -864,8 +859,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/simple/experiment/full/ExperimentRunner.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1593">
-          <caret line="108" column="17" selection-start-line="108" selection-start-column="17" selection-end-line="108" selection-end-column="17" />
+        <state relative-caret-position="207">
+          <caret line="64" column="84" selection-start-line="64" selection-start-column="84" selection-end-line="64" selection-end-column="84" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
