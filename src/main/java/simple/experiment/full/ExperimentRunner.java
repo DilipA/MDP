@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * Created by dilip on 11/8/16.
@@ -61,44 +62,48 @@ public class ExperimentRunner {
 
         for(Integer n : nVals){
             System.out.println("Running on " + n + " trajectories of length 10");
-            for(int i=0;i < numDatasets;i++) {
-                System.out.println("Runing on dataset " + i + " of " + numDatasets);
-                List<Trajectory> dataset = DataGenerator.generateNTrajectories(10, n, randomMDP);
-                MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
-                MDP estimatedMDP = estimator.getMdp();
+            IntStream.range(0, numDatasets).parallel().forEach(i -> {
+                try {
+                    System.out.println("Runing on dataset " + (i+1) + " of " + numDatasets);
+                    List<Trajectory> dataset = DataGenerator.generateNTrajectories(10, n, randomMDP);
+                    MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
+                    MDP estimatedMDP = estimator.getMdp();
 
-                for (Double gamma : gammas) {
-                    System.out.println("Running for gamma = " + gamma);
-                    double gammaEval = 0.99;
+                    for (Double gamma : gammas) {
+                        //System.out.println("Running for gamma = " + gamma);
+                        double gammaEval = 0.99;
 
-                    ValueIteration vi1 = new ValueIteration(randomMDP, gammaEval);
-                    vi1.run();
-                    vi1.computePolicy();
+                        ValueIteration vi1 = new ValueIteration(randomMDP, gammaEval);
+                        vi1.run();
+                        vi1.computePolicy();
 
-                    PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gammaEval, vi1.getPolicy());
-                    pe1.run();
-                    Map<State, Double> v1 = pe1.getValueFunction();
+                        PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gammaEval, vi1.getPolicy());
+                        pe1.run();
+                        Map<State, Double> v1 = pe1.getValueFunction();
 
-                    ValueIteration vi2 = new ValueIteration(estimatedMDP, gamma);
-                    vi2.run();
-                    vi2.computePolicy();
+                        ValueIteration vi2 = new ValueIteration(estimatedMDP, gamma);
+                        vi2.run();
+                        vi2.computePolicy();
 
-                    PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gammaEval, vi2.getPolicy());
-                    pe2.run();
-                    Map<State, Double> v2 = pe2.getValueFunction();
+                        PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gammaEval, vi2.getPolicy());
+                        pe2.run();
+                        Map<State, Double> v2 = pe2.getValueFunction();
 
-                    double sumDiff = 0.0;
-                    for (State s : randomMDP.getStates()) {
-                        sumDiff += v1.get(s) - v2.get(s);
+                        double sumDiff = 0.0;
+                        for (State s : randomMDP.getStates()) {
+                            sumDiff += v1.get(s) - v2.get(s);
+                        }
+
+                        double empiricalLoss = sumDiff / randomMDP.getStates().size();
+                        if (results.get(n, gamma) == null) {
+                            results.put(n, gamma, new ArrayList<>());
+                        }
+                        results.get(n, gamma).add(empiricalLoss);
                     }
-
-                    double empiricalLoss = sumDiff / randomMDP.getStates().size();
-                    if(results.get(n, gamma) == null){
-                        results.put(n, gamma, new ArrayList<>());
-                    }
-                    results.get(n, gamma).add(empiricalLoss);
+                } catch (MDPException e) {
+                    e.printStackTrace();
                 }
-            }
+            });
         }
 
 //        for(Integer n : nVals){
@@ -109,7 +114,7 @@ public class ExperimentRunner {
 //        }
 //        System.out.println(results);
 
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(new File("out/figure3_results.csv")))){
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(new File("figure3_results.csv")))){
             bw.write("Trajectories, gamma, loss\n");
             for(Integer n : nVals){
                 for(Double gamma : gammas){
@@ -128,7 +133,73 @@ public class ExperimentRunner {
 
     }
 
+    public static void runFigure3Grid() throws MDPException {
+        //Draw a single MDP from RandomMDP
+        MDP randomMDP = RandomMDP.sample();
+
+        Table<Integer, Double, Double> results = HashBasedTable.create();
+
+        List<Integer> nVals = new ArrayList<>();
+        nVals.add(5);
+        nVals.add(10);
+        nVals.add(20);
+        nVals.add(50);
+
+        List<Double> gammas = new ArrayList<>();
+        gammas.add(0.0);
+        gammas.add(0.1);
+        gammas.add(0.2);
+        gammas.add(0.3);
+        gammas.add(0.4);
+        gammas.add(0.5);
+        gammas.add(0.6);
+        gammas.add(0.7);
+        gammas.add(0.8);
+        gammas.add(0.9);
+        gammas.add(0.99);
+
+        for(Integer n : nVals) {
+            List<Trajectory> dataset = DataGenerator.generateNTrajectories(10, n, randomMDP);
+            MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
+            MDP estimatedMDP = estimator.getMdp();
+
+            for (Double gamma : gammas) {
+                double gammaEval = 0.99;
+
+                ValueIteration vi1 = new ValueIteration(randomMDP, gammaEval);
+                vi1.run();
+                vi1.computePolicy();
+
+                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gammaEval, vi1.getPolicy());
+                pe1.run();
+                Map<State, Double> v1 = pe1.getValueFunction();
+
+                ValueIteration vi2 = new ValueIteration(estimatedMDP, gamma);
+                vi2.run();
+                vi2.computePolicy();
+
+                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gammaEval, vi2.getPolicy());
+                pe2.run();
+                Map<State, Double> v2 = pe2.getValueFunction();
+
+                double sumDiff = 0.0;
+                for (State s : randomMDP.getStates()) {
+                    sumDiff += v1.get(s) - v2.get(s);
+                }
+
+                double empiricalLoss = sumDiff / randomMDP.getStates().size();
+                results.put(n, gamma, empiricalLoss);
+            }
+        }
+
+        for(Integer n : nVals){
+            for(Double gamma : gammas){
+                System.out.println(n + "," + gamma + "," + results.get(n, gamma));
+            }
+        }
+    }
+
     public static void main(String[] args) throws MDPException {
-        runFigure3();
+        runFigure3Grid();
     }
 }
