@@ -97,7 +97,7 @@ public class ExperimentRunner {
                 if(results.get(n, gamma) == null) {
                     results.put(n, gamma, new HashMap<>());
                 }
-                results.get(n, gamma).put(0, testingLoss);
+                results.get(n, gamma).put(1, testingLoss);
             }
         }
 
