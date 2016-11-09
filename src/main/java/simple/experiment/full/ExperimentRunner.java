@@ -280,6 +280,6 @@ public class ExperimentRunner {
     }
 
     public static void main(String[] args) throws MDPException {
-        runFigure3Grid();
+        runFigure1Grid();
     }
 }
