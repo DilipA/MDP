@@ -74,7 +74,7 @@ public class MDP {
 			}
 		}
 		this.reward = reward;
-		this.rewardNoise = 0.1;
+		this.rewardNoise = 0.0;
 	}
 	
 	/**
