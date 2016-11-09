@@ -38,6 +38,27 @@ public class DataGenerator {
         return ret;
     }
 
+    public static Trajectory generateSATrajectory(State s, Action a, MDP mdp){
+        Trajectory ret = new Trajectory(mdp.getStates(), mdp.getActions());
+        ret.intialize(s);
+        State next = mdp.sampleTransition(s, a);
+        double reward = mdp.getReward(s, next, a);
+        ret.step(a, reward, next);
+        return ret;
+    }
+
+    public static List<Trajectory> generateNSATrajectories(int n, MDP mdp){
+        List<Trajectory> ret = new ArrayList<>();
+        for(State s : mdp.getStates()){
+            for(Action a : mdp.getActions()){
+                for(int i=0;i < n;i++){
+                    ret.add(generateSATrajectory(s, a, mdp));
+                }
+            }
+        }
+        return ret;
+    }
+
     public static void main(String[] args) throws MDPException {
         MDP randomMDP = RandomMDP.sample();
         //System.out.println(generateTrajectory(10, randomMDP));

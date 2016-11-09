@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -26,8 +27,87 @@ import java.util.stream.IntStream;
  */
 public class ExperimentRunner {
 
-    public static void runFigure1() throws MDPException {
+    public static void runFigure1Grid() throws MDPException {
+        //Draw a single MDP from RandomMDP
+        MDP randomMDP = RandomMDP.sample();
 
+        // Number of samples, Gamma value, 0-1 train-test, loss value
+        Table<Integer, Double, Map<Integer, Double>> results = HashBasedTable.create();
+
+        List<Integer> nVals = new ArrayList<>();
+        nVals.add(2);
+        nVals.add(5);
+        nVals.add(10);
+        nVals.add(20);
+
+        List<Double> gammas = new ArrayList<>();
+        gammas.add(0.0);
+        gammas.add(0.1);
+        gammas.add(0.2);
+        gammas.add(0.3);
+        gammas.add(0.4);
+        gammas.add(0.5);
+        gammas.add(0.6);
+        gammas.add(0.7);
+        gammas.add(0.8);
+        gammas.add(0.9);
+        gammas.add(0.99);
+
+        for (Integer n : nVals) {
+            List<Trajectory> dataset = DataGenerator.generateNSATrajectories(n, randomMDP);
+            MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
+            MDP estimatedMDP = estimator.getMdp();
+
+            for (Double gamma : gammas) {
+                double gammaEval = 0.99;
+
+                ValueIteration train_policy = new ValueIteration(estimatedMDP, gamma);
+                train_policy.run();
+                train_policy.computePolicy();
+
+                PolicyEvaluation train_eval = new PolicyEvaluation(estimatedMDP, gammaEval, train_policy.getPolicy());
+                train_eval.run();
+                Map<State, Double> v1 = train_eval.getValueFunction();
+
+                double trainingLoss = 0.0;
+                for(State s : randomMDP.getStates()) {
+                    trainingLoss += v1.get(s);
+                }
+
+                trainingLoss = - trainingLoss / randomMDP.getStates().size();
+                if(results.get(n, gamma) == null) {
+                    results.put(n, gamma, new HashMap<>());
+                }
+                results.get(n, gamma).put(0, trainingLoss);
+
+                ValueIteration test_policy = new ValueIteration(estimatedMDP, gamma);
+                test_policy.run();
+                test_policy.computePolicy();
+
+                PolicyEvaluation test_eval = new PolicyEvaluation(randomMDP, gammaEval, test_policy.getPolicy());
+                test_eval.run();
+                Map<State, Double> v2 = test_eval.getValueFunction();
+
+                double testingLoss = 0.0;
+                for(State s : randomMDP.getStates()) {
+                    testingLoss += v2.get(s);
+                }
+
+                testingLoss = - testingLoss / randomMDP.getStates().size();
+                if(results.get(n, gamma) == null) {
+                    results.put(n, gamma, new HashMap<>());
+                }
+                results.get(n, gamma).put(0, testingLoss);
+            }
+        }
+
+        for(Integer n : nVals){
+            for(Double gamma : gammas){
+                for(int i=0;i <= 1;i++){
+                    System.out.println(n + "," + gamma + "," + i + "," + results.get(n, gamma).get(i));
+                }
+            }
+        }
     }
 
     public static void runFigure3() throws MDPException {
