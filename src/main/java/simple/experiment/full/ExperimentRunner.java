@@ -186,16 +186,7 @@ public class ExperimentRunner {
             });
         }
 
-//        for(Integer n : nVals){
-//            for(Double gamma : gammas){
-//                results.put(n, gamma, results.get(n, gamma));
-//                System.out.println(n + "\t" + gamma + "\t" + results.get(n, gamma));
-//            }
-//        }
-//        System.out.println(results);
-
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(new File("figure3_results.csv")))){
-            bw.write("Trajectories, gamma, loss\n");
             for(Integer n : nVals){
                 for(Double gamma : gammas){
                     for(Double loss : results.get(n, gamma)){

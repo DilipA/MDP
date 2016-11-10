@@ -1,47 +1,58 @@
 import sys
+import argparse
 import numpy as np
 from os import listdir
 from os.path import isfile, join
 from collections import defaultdict
-
+import scipy.stats as ss
 import matplotlib.pyplot as plt
 
-onlyfiles = [f for f in listdir('/home/darumuga/') if isfile(join('/home/darumuga/', f))]
-onlyfiles = [f for f in onlyfiles if 'run_figure1.o' in f]
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
 
-num_trials = 1000
-samples = [2, 5, 10, 20]
-gammas = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+    parser.add_argument('--no_parse', action='store_true', help='Skip parsing Grid data files in the current directory')
 
-with open('figure1_results.csv', 'wb') as out:
-    for f in onlyfiles:
-        with open(f, 'rb') as inp:
-            for line in inp:
-                out.write(line)
+    args = parser.parse_args()
 
-training_means = defaultdict(lambda: defaultdict(float))
-testing_means = defaultdict(lambda: defaultdict(float))
+    num_trials = 1000
+    samples = [2, 5, 10, 20]
+    gammas = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
 
-with open('figure1_results.csv', 'rb') as inp:
-    for line in inp:
-        split = line.split(',')
-        if int(split[2]) == 0:
-            training_means[int(split[0])][float(split[1])] += float(split[3])
-        else:
-            testing_means[int(split[0])][float(split[1])] += float(split[3])
+    if not args.no_parse:
+        onlyfiles = [f for f in listdir('/home/darumuga/') if isfile(join('/home/darumuga/', f))]
+        onlyfiles = [f for f in onlyfiles if 'run_figure1.o' in f]
 
-for i in samples:
-    for j in gammas:
-        training_means[i][j] = training_means[i][j] / num_trials
-        testing_means[i][j] = testing_means[i][j] / num_trials
+        with open('figure1_results.csv', 'wb') as out:
+            for f in onlyfiles:
+                with open(f, 'rb') as inp:
+                    for line in inp:
+                        out.write(line)
 
+    training_data = defaultdict(lambda: defaultdict(list))
+    testing_data = defaultdict(lambda: defaultdict(list))
+
+    with open('figure1_results.csv', 'rb') as inp:
+        for line in inp:
+            split = line.split(',')
+            if int(split[2]) == 0:
+                training_data[int(split[0])][float(split[1])] += [float(split[3])]
+            else:
+                testing_data[int(split[0])][float(split[1])] += [float(split[3])]
+                
 style = ['r--', 'b--']
-
 for i in samples:
-    data = sorted(list(training_means[i].iteritems()), key=lambda x: x[0])
-    trl, = plt.plot([x[0] for x in data], [x[1] for x in data], style[0], label='Training Loss')
+    tuples = sorted(list(training_data[i].iteritems()), key=lambda x: x[0])
+    trl, = plt.plot([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], style[0], label='Training Loss')
+    print ss.t.ppf(0.95, np.array([num_trials-1]*len(gammas)))*np.array([np.std(x[1]) for x in tuples])
+    #plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=ss.t.ppf(0.95, np.array([num_trials-1]*len(gammas)))*np.array([np.std(x[1]) for x in tuples]), color=style[0][0])
 
-    data = sorted(list(testing_means[i].iteritems()), key=lambda x: x[0])
-    tel, = plt.plot([x[0] for x in data], [x[1] for x in data], style[1], label='Testing Loss')
-    plt.legend(handles=[trl, tel], loc=2)
+
+    tuples = sorted(list(testing_data[i].iteritems()), key=lambda x: x[0])
+    tel, = plt.plot([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], style[1], label='Testing Loss')
+    #plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=ss.t.ppf(0.95, np.array([num_trials-1]*len(gammas)))*np.array([np.std(x[1]) for x in tuples]), color=style[1][0])
+
+    plt.legend(handles=[trl, tel], loc=9)
+    plt.title('{0} samples per (s,a) pair'.format(i), loc='center')
+    plt.xlabel('Gamma')
+    plt.ylabel('Loss')
     plt.show()

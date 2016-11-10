@@ -43,6 +43,11 @@ public class MDP {
 	private final double rewardNoise;
 
 	/**
+	 * Random generator
+	 */
+	private final Random rndg = new Random();
+
+	/**
 	 * Constructor. 
 	 * 
 	 * @param states
@@ -98,7 +103,7 @@ public class MDP {
 	 * @return the reward obtained from being in state sFrom, taking action a and landing in sTo.
 	 */
 	public double getReward(State sFrom, State sTo, Action a) {
-		return this.reward.get(sFrom, a).get(sTo) + new Random().nextGaussian()*this.rewardNoise;
+		return this.reward.get(sFrom, a).get(sTo) + this.rndg.nextGaussian()*this.rewardNoise;
 	}
 	
 	/**
