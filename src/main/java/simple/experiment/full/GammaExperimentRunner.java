@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 /**
  * Created by dilip on 11/8/16.
  */
-public class ExperimentRunner {
+public class GammaExperimentRunner {
 
     public static void runFigure1Grid() throws MDPException {
         //Draw a single MDP from RandomMDP

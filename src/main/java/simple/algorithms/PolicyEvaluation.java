@@ -1,5 +1,6 @@
 package simple.algorithms;
 
+import com.google.common.collect.Lists;
 import simple.MDP.Action;
 import simple.MDP.MDP;
 import simple.MDP.State;
@@ -12,6 +13,7 @@ import simple.sample.RandomMDP;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by dilip on 11/7/16.
@@ -39,6 +41,11 @@ public class PolicyEvaluation {
     private final double gamma;
 
     /**
+     * The value of epsilon to use in the epsilon-greedy policy
+     */
+    private final double epsilon;
+
+    /**
      * Tolerance parameter.
      */
     private static double tolerance = 0.0001;
@@ -48,10 +55,28 @@ public class PolicyEvaluation {
      */
     private static int maxIter = 10000;
 
+    /**
+     * Random generator
+     */
+    private final Random rndg = new Random();
+
     public PolicyEvaluation(MDP mdp, double gamma, Map<State, Action> policy){
         this.mdp = mdp;
         this.gamma = gamma;
         this.policy = policy;
+        this.epsilon = 0.0;
+        this.V = new HashMap<>();
+        // Initialize the value function to 0.0
+        for (State s : this.mdp.getStates()) {
+            this.V.put(s, 0.0);
+        }
+    }
+
+    public PolicyEvaluation(MDP mdp, double gamma, double epsilon, Map<State, Action> policy){
+        this.mdp = mdp;
+        this.gamma = gamma;
+        this.policy = policy;
+        this.epsilon = epsilon;
         this.V = new HashMap<>();
         // Initialize the value function to 0.0
         for (State s : this.mdp.getStates()) {
@@ -71,7 +96,14 @@ public class PolicyEvaluation {
             // For each state of the simple.MDP.
             for (State state : this.mdp.getStates()) {
                 // Compute the value of the action with the highest expected reward.
-                Action action = this.policy.get(state);
+                Action action;
+                if(this.rndg.nextDouble() < this.epsilon){
+                    action = Lists.newArrayList(this.mdp.getActions()).get(this.rndg.nextInt(this.mdp.getActions().size()));
+                }
+                else{
+                    action = this.policy.get(state);
+                }
+
                 double sum = 0.0;
                 for(State sprime : this.mdp.getStates()) {
                     sum += this.mdp.getTransition(state, sprime, action) * (this.mdp.getReward(state, sprime, action) + this.gamma * this.V.get(sprime));
