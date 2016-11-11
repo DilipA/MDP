@@ -219,16 +219,15 @@ public class EpsilonExperimentRunner {
 
                 for(State s : randomMDP.getStates()){
                     for(Action a : randomMDP.getActions()){
+                        HashMap<State, Double> transitionMap = new HashMap<>();
                         for(State sprime : randomMDP.getStates()){
-                            if(transitionsMean.get(s, a) == null){
-                                transitionsMean.put(s, a, new HashMap<>());
-                            }
                             double mean = 0.0;
                             for(Action aprime : randomMDP.getActions()){
                                 mean += transition.get(s, aprime).get(sprime);
                             }
-                            transitionsMean.get(s, a).put(sprime, mean);
+                            transitionMap.put(sprime, mean);
                         }
+                        transitionsMean.put(s, a, transitionMap);
                     }
                 }
 
