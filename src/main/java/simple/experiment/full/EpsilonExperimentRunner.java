@@ -51,17 +51,16 @@ public class EpsilonExperimentRunner {
         epsilons.add(1.0);
 
         for (Integer n : nVals) {
-            List<Trajectory> dataset = DataGenerator.generateNSATrajectories(n, randomMDP);
-            MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
-            MDP estimatedMDP = estimator.getMdp();
-
             for (Double epsilon : epsilons) {
+                List<Trajectory> dataset = DataGenerator.generateNSATrajectories(n, randomMDP);
+                MDPEstimator estimator = new MDPEstimator(epsilon, randomMDP.getStates(), randomMDP.getActions(), dataset);
+                MDP estimatedMDP = estimator.getMdp();
 
                 ValueIteration train_policy = new ValueIteration(estimatedMDP, gamma);
                 train_policy.run();
                 train_policy.computePolicy();
 
-                PolicyEvaluation train_eval = new PolicyEvaluation(estimatedMDP, gamma, epsilon, train_policy.getPolicy());
+                PolicyEvaluation train_eval = new PolicyEvaluation(estimatedMDP, gamma, 0.0, train_policy.getPolicy());
                 train_eval.run();
                 Map<State, Double> v1 = train_eval.getValueFunction();
 
@@ -80,7 +79,7 @@ public class EpsilonExperimentRunner {
                 test_policy.run();
                 test_policy.computePolicy();
 
-                PolicyEvaluation test_eval = new PolicyEvaluation(randomMDP, gamma, epsilon, test_policy.getPolicy());
+                PolicyEvaluation test_eval = new PolicyEvaluation(randomMDP, gamma, 0.0, test_policy.getPolicy());
                 test_eval.run();
                 Map<State, Double> v2 = test_eval.getValueFunction();
 
@@ -143,7 +142,7 @@ public class EpsilonExperimentRunner {
                 vi1.run();
                 vi1.computePolicy();
 
-                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, epsilon, vi1.getPolicy());
+                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, 0.0, vi1.getPolicy());
                 pe1.run();
                 Map<State, Double> v1 = pe1.getValueFunction();
 

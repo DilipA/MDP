@@ -10,6 +10,7 @@ import simple.sample.RandomMDP;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 /**
@@ -61,12 +62,13 @@ public class DataGenerator {
 
     public static void main(String[] args) throws MDPException {
         MDP randomMDP = RandomMDP.sample();
+
         //System.out.println(generateTrajectory(10, randomMDP));
 
         List<Trajectory> trajectories = generateNTrajectories(10, 10, randomMDP);
-        for(Trajectory t : trajectories){
-            System.out.println(t);
-            System.out.println("\n\n");
-        }
+//        for(Trajectory t : trajectories){
+//            System.out.println(t);
+//            System.out.println("\n\n");
+//        }
     }
 }

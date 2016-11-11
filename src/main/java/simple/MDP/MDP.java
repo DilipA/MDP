@@ -149,6 +149,15 @@ public class MDP {
 		return transition.sample();
 	}
 
+	public State sampleRandomTransition(State s, Action a){
+		long numReachable = this.transition.get(s, a).entrySet().stream().filter(e -> e.getValue() > 0.0).count();
+		List<Pair<State, Double>> pmf = this.transition.get(s, a).entrySet().stream()
+				.filter(e -> e.getValue() > 0.0)
+				.map(e -> new Pair<>(e.getKey(), 1.0 / numReachable)).collect(Collectors.toList());
+		EnumeratedDistribution<State> transition = new EnumeratedDistribution<>(pmf);
+		return transition.sample();
+	}
+
 	@Override
 	public String toString() {
 		String ret = "\nStates: \n";

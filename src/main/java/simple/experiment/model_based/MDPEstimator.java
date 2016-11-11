@@ -35,7 +35,13 @@ public class MDPEstimator {
     /**
      * There is a probability of transition from one state to another by taking an action.
      */
-    private final Table<State, Action, Map<State, Double>> transitions;
+    private final Table<State, Action, Map<State, Double>> transitionsEst;
+
+    private final Table<State, Action, Map<State, Double>> transitionsMean;
+
+    private final Table<State, Action, Map<State, Double>> transitionsReg;
+
+
 
     /**
      * Transition from one state to another yields a reward.
@@ -50,34 +56,81 @@ public class MDPEstimator {
     public MDPEstimator(Set<State> states, Set<Action> actions, List<Trajectory> data) throws MDPException {
         this.states = states;
         this.actions = actions;
-        this.transitions = HashBasedTable.create();
+        this.transitionsEst = HashBasedTable.create();
+        this.transitionsMean = HashBasedTable.create();
+        this.transitionsReg = HashBasedTable.create();
         this.rewards = HashBasedTable.create();
-        this.estimateModel(data);
-        this.mdp = new MDP(this.states, this.actions, this.transitions, this.rewards);
+        this.estimateModel(data, 0.0);
+        this.mdp = new MDP(this.states, this.actions, this.transitionsEst, this.rewards);
     }
 
-    private void estimateModel(List<Trajectory> data){
+    public MDPEstimator(double epsilon, Set<State> states, Set<Action> actions, List<Trajectory> data) throws MDPException {
+        this.states = states;
+        this.actions = actions;
+        this.transitionsEst = HashBasedTable.create();
+        this.transitionsMean = HashBasedTable.create();
+        this.transitionsReg = HashBasedTable.create();
+        this.rewards = HashBasedTable.create();
+        this.estimateModel(data, epsilon);
+        this.mdp = new MDP(this.states, this.actions, this.transitionsReg, this.rewards);
+    }
+
+    private void estimateModel(List<Trajectory> data, double epsilon){
         for(State s : this.states){
             for(Action a : this.actions){
                 Map<State, Double> rewardMap = new HashMap<>();
-                Map<State, Double> transitionMap = new HashMap<>();
+                Map<State, Double> transitionDataMap = new HashMap<>();
                 int observedSA = data.stream().mapToInt(t -> t.getStateActionCounter().get(s, a)).sum();
                 if(observedSA > 0){
                     double rewardSum = data.stream().mapToDouble(t -> t.getStateActionReward().get(s, a)).sum();
                     for (State sprime : this.states) {
                         int observedSASP = data.stream().mapToInt(t -> t.getStateActionTransition().get(s, a).get(sprime)).sum();
-                        transitionMap.put(sprime, ((double) observedSASP) / observedSA);
+                        transitionDataMap.put(sprime, ((double) observedSASP) / observedSA);
                         rewardMap.put(sprime, rewardSum / observedSA);
                     }
                 }
                 else {
                     for(State sprime : this.states){
                         rewardMap.put(sprime, 0.5);
-                        transitionMap.put(sprime, 1.0 / this.states.size());
+                        transitionDataMap.put(sprime, 1.0 / this.states.size());
                     }
                 }
                 this.rewards.put(s, a, rewardMap);
-                this.transitions.put(s, a, transitionMap);
+                this.transitionsEst.put(s, a, transitionDataMap);
+            }
+        }
+
+        for(State s : this.states){
+            for(Action a : this.actions){
+                for(State sprime : this.states){
+                    if(this.transitionsMean.get(s, a) == null){
+                        this.transitionsMean.put(s, a, new HashMap<>());
+                    }
+                    double mean = 0.0;
+                    for(Action aprime : this.actions){
+                        mean += this.transitionsEst.get(s, aprime).get(sprime);
+                    }
+                    this.transitionsMean.get(s, a).put(sprime, mean);
+                }
+            }
+        }
+
+        for(State s : this.states){
+            for(Action a : this.actions){
+                double norm = this.transitionsMean.get(s, a).values().stream().mapToDouble(i -> i).sum();
+                for(State sprime : this.states){
+                    this.transitionsMean.get(s, a).put(sprime, this.transitionsMean.get(s, a).get(sprime) / norm);
+                }
+            }
+        }
+
+        for(State s : this.states){
+            for(Action a : this.actions){
+                Map<State, Double> transitionMap = new HashMap<>();
+                for(State sprime : this.states){
+                    transitionMap.put(sprime, (1 - epsilon) * this.transitionsEst.get(s, a).get(sprime) + epsilon * this.transitionsMean.get(s, a).get(sprime));
+                }
+                this.transitionsReg.put(s, a, transitionMap);
             }
         }
     }

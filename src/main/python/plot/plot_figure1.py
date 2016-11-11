@@ -25,7 +25,10 @@ if __name__ == '__main__':
         
     if not args.no_parse:
         onlyfiles = [f for f in listdir('/home/darumuga/') if isfile(join('/home/darumuga/', f))]
-        onlyfiles = [f for f in onlyfiles if 'run_figure1.o' in f]
+        if not args.epsilon:
+            onlyfiles = [f for f in onlyfiles if 'run_figure1.o' in f]
+        else:
+            onlyfiles = [f for f in onlyfiles if 'run_figure1_eps.o' in f]
 
         with open(output_file, 'wb') as out:
             for f in onlyfiles:
@@ -48,12 +51,12 @@ style = ['r--', 'b--']
 for i in samples:
     tuples = sorted(list(training_data[i].iteritems()), key=lambda x: x[0])
     trl, = plt.plot([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], style[0], label='Training Loss')
-    #plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples]), color=style[0][0])
+    plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples])*(1/np.sqrt(num_trials)), color=style[0][0])
 
 
     tuples = sorted(list(testing_data[i].iteritems()), key=lambda x: x[0])
     tel, = plt.plot([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], style[1], label='Testing Loss')
-    #plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples]), color=style[1][0])
+    plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples])*(1/np.sqrt(num_trials)), color=style[1][0])
 
     plt.legend(handles=[trl, tel], loc=9)
     plt.title('{0} samples per (s,a) pair'.format(i), loc='center')
@@ -62,4 +65,7 @@ for i in samples:
     else:
         plt.xlabel('Epsilon')
     plt.ylabel('Loss')
+    plt.xlim(-0.1,1.1)
+    plt.ylim(-82.0, -70.0)
     plt.show()
+    #plt.save('figure1_{0}_eps.png'.format(i))

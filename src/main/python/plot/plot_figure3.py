@@ -26,7 +26,10 @@ if __name__ == '__main__':
 
     if not args.no_parse:
         onlyfiles = [f for f in listdir('/home/darumuga/') if isfile(join('/home/darumuga/', f))]
-        onlyfiles = [f for f in onlyfiles if 'run_figure3.o' in f]
+        if not args.epsilon:
+            onlyfiles = [f for f in onlyfiles if 'run_figure3.o' in f]
+        else:
+            onlyfiles = [f for f in onlyfiles if 'run_figure3_eps.o' in f]
     
         with open(output_file, 'wb') as out:
             for f in onlyfiles:
@@ -46,7 +49,7 @@ if __name__ == '__main__':
     for index, i in enumerate(trajecs):
         tuples = sorted(list(data[i].iteritems()), key=lambda x: x[0])
         l, = plt.plot([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], style[index], label='{0} trajectories'.format(i))
-        #plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples]), color=style[index][0])
+        plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples])*(1.0/np.sqrt(num_samples)), color=style[index][0])
         legend_handles.append(l)
     
     plt.legend(handles=legend_handles, loc=2)
@@ -57,4 +60,5 @@ if __name__ == '__main__':
         plt.title('Planning loss vs. Exploration', loc='center')
         plt.xlabel('Epsilon')
     plt.ylabel('Planning Loss')
+    plt.xlim(-0.1,1.1)
     plt.show()

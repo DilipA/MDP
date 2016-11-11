@@ -24,13 +24,15 @@ public class RandomMDP {
 
 	public static MDP sample() throws MDPException {
 		// Create 10 states.
+		int numStates = 10;
+		int numActions = 2;
 		HashSet<State> states = new HashSet<State>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < numStates; i++) {
 			states.add(new State("State # " + i));
 		}
 		// Create 10 actions.
 		HashSet<Action> actions = new HashSet<Action>();
-		for (int j = 0; j < 2; j++) {
+		for (int j = 0; j < numActions; j++) {
 			actions.add(new Action("Action # " + j));
 		}
 		// Create the transition distribution.
