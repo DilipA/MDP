@@ -1,7 +1,9 @@
 package simple.experiment.full;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import simple.MDP.Action;
 import simple.MDP.MDP;
 import simple.MDP.State;
 import simple.MDP.Trajectory;
@@ -12,10 +14,7 @@ import simple.experiment.data.DataGenerator;
 import simple.experiment.model_based.MDPEstimator;
 import simple.sample.RandomMDP;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by dilip on 11/8/16.
@@ -172,7 +171,121 @@ public class EpsilonExperimentRunner {
         }
     }
 
+    public static void runPolicyCountGrid() throws MDPException{
+        List<Double> epsilons = new ArrayList<>();
+        epsilons.add(0.0);
+        epsilons.add(0.1);
+        epsilons.add(0.2);
+        epsilons.add(0.3);
+        epsilons.add(0.4);
+        epsilons.add(0.5);
+        epsilons.add(0.6);
+        epsilons.add(0.7);
+        epsilons.add(0.8);
+        epsilons.add(0.9);
+        epsilons.add(1.0);
+
+        double gamma = 0.99;
+
+        Map<Double, Integer> results = new HashMap<>();
+
+        Random rndg = new Random();
+
+        for(Double epsilon : epsilons){
+            MDP randomMDP = RandomMDP.sample();
+
+            List<State> states = Lists.newArrayList(randomMDP.getStates());
+            Set<String> policies = new HashSet<>();
+            double totalPolicies = Math.pow(randomMDP.getActions().size(), randomMDP.getStates().size());
+            boolean running = true;
+            int noChanges = 0;
+            while(running){
+                Table<State, Action, Map<State, Double>> transition = HashBasedTable.create();
+                for(State s : randomMDP.getStates()){
+                    for(Action a : randomMDP.getActions()){
+                        Map<State, Double> transitionMap = new HashMap<>();
+                        for(State sprime : randomMDP.getStates()){
+                            transitionMap.put(sprime, rndg.nextDouble());
+                        }
+                        double norm = transitionMap.values().stream().mapToDouble(i -> i).sum();
+                        for(State sprime : transitionMap.keySet()){
+                            transitionMap.put(sprime, transitionMap.get(sprime) / norm);
+                        }
+                        transition.put(s, a, transitionMap);
+                    }
+                }
+
+                Table<State, Action, Map<State, Double>> transitionsMean = HashBasedTable.create();
+
+                for(State s : randomMDP.getStates()){
+                    for(Action a : randomMDP.getActions()){
+                        for(State sprime : randomMDP.getStates()){
+                            if(transitionsMean.get(s, a) == null){
+                                transitionsMean.put(s, a, new HashMap<>());
+                            }
+                            double mean = 0.0;
+                            for(Action aprime : randomMDP.getActions()){
+                                mean += transition.get(s, aprime).get(sprime);
+                            }
+                            transitionsMean.get(s, a).put(sprime, mean);
+                        }
+                    }
+                }
+
+                for(State s : randomMDP.getStates()){
+                    for(Action a : randomMDP.getActions()){
+                        double norm = transitionsMean.get(s, a).values().stream().mapToDouble(i -> i).sum();
+                        for(State sprime : randomMDP.getStates()){
+                            transitionsMean.get(s, a).put(sprime, transitionsMean.get(s, a).get(sprime) / norm);
+                        }
+                    }
+                }
+
+                Table<State, Action, Map<State, Double>> transitionsReg = HashBasedTable.create();
+
+                for(State s : randomMDP.getStates()){
+                    for(Action a : randomMDP.getActions()){
+                        Map<State, Double> transitionMap = new HashMap<>();
+                        for(State sprime : randomMDP.getStates()){
+                            transitionMap.put(sprime, (1 - epsilon) * transition.get(s, a).get(sprime) + epsilon * transitionsMean.get(s, a).get(sprime));
+                        }
+                        transitionsReg.put(s, a, transitionMap);
+                    }
+                }
+
+                randomMDP.setTransition(transitionsReg);
+
+                ValueIteration vi= new ValueIteration(randomMDP, gamma);
+                vi.run();
+                vi.computePolicy();
+                Map<State, Action> policy = vi.getPolicy();
+                StringBuilder sb = new StringBuilder();
+                for(State s : states){
+                    sb.append(policy.get(s).getId());
+                }
+                int before = policies.size();
+                policies.add(sb.toString());
+
+                if(before == policies.size()){
+                    noChanges += 1;
+                }
+                else{
+                    noChanges = 0;
+                }
+
+                if(policies.size() == totalPolicies || noChanges >= 5000){
+                    running = false;
+                }
+            }
+            results.put(epsilon, policies.size());
+        }
+
+        for(Double epsilon : epsilons){
+            System.out.println(epsilon + "," + results.get(epsilon));
+        }
+    }
+
     public static void main(String[] args) throws MDPException {
-        runFigure1Grid();
+        runPolicyCountGrid();
     }
 }
