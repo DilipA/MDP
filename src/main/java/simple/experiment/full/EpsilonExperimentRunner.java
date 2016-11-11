@@ -51,8 +51,8 @@ public class EpsilonExperimentRunner {
         epsilons.add(1.0);
 
         for (Integer n : nVals) {
+            List<Trajectory> dataset = DataGenerator.generateNSATrajectories(n, randomMDP);
             for (Double epsilon : epsilons) {
-                List<Trajectory> dataset = DataGenerator.generateNSATrajectories(n, randomMDP);
                 MDPEstimator estimator = new MDPEstimator(epsilon, randomMDP.getStates(), randomMDP.getActions(), dataset);
                 MDP estimatedMDP = estimator.getMdp();
 
@@ -134,15 +134,16 @@ public class EpsilonExperimentRunner {
 
         for(Integer n : nVals) {
             List<Trajectory> dataset = DataGenerator.generateNTrajectories(10, n, randomMDP);
-            MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
-            MDP estimatedMDP = estimator.getMdp();
 
             for (Double epsilon : epsilons) {
+                MDPEstimator estimator = new MDPEstimator(epsilon, randomMDP.getStates(), randomMDP.getActions(), dataset);
+                MDP estimatedMDP = estimator.getMdp();
+
                 ValueIteration vi1 = new ValueIteration(randomMDP, gamma);
                 vi1.run();
                 vi1.computePolicy();
 
-                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, 0.0, vi1.getPolicy());
+                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, vi1.getPolicy());
                 pe1.run();
                 Map<State, Double> v1 = pe1.getValueFunction();
 
@@ -150,7 +151,7 @@ public class EpsilonExperimentRunner {
                 vi2.run();
                 vi2.computePolicy();
 
-                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gamma, epsilon, vi2.getPolicy());
+                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gamma, vi2.getPolicy());
                 pe2.run();
                 Map<State, Double> v2 = pe2.getValueFunction();
 

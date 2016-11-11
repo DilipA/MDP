@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    num_trials = 1000
+    num_trials = 10000
     samples = [2, 5, 10, 20]
     
     if not args.epsilon:
@@ -66,6 +66,6 @@ for i in samples:
         plt.xlabel('Epsilon')
     plt.ylabel('Loss')
     plt.xlim(-0.1,1.1)
-    plt.ylim(-82.0, -70.0)
+    #plt.ylim(-75.0, -62.0)
     plt.show()
     #plt.save('figure1_{0}_eps.png'.format(i))

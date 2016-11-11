@@ -52,7 +52,7 @@ if __name__ == '__main__':
         plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples])*(1.0/np.sqrt(num_samples)), color=style[index][0])
         legend_handles.append(l)
     
-    plt.legend(handles=legend_handles, loc=2)
+    plt.legend(handles=legend_handles, loc=9)
     if not args.epsilon:
         plt.title('Planning loss vs. Discount factor', loc='center')
         plt.xlabel('Gamma')
