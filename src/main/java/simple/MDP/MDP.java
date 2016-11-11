@@ -30,7 +30,7 @@ public class MDP {
 	/**
 	 * There is a probability of transition from one state to another by taking an action.
 	 */
-	private final Table<State, Action, Map<State, Double>> transition;
+	private Table<State, Action, Map<State, Double>> transition;
 
 	/**
 	 * Transition from one state to another yields a reward.
@@ -140,6 +140,10 @@ public class MDP {
 	public Action getRandomAction(){
 		List<Action> allActions = Lists.newArrayList(this.actions);
 		return allActions.get(new Random().nextInt(allActions.size()));
+	}
+
+	public void setTransition(Table<State, Action, Map<State, Double>> newTrans){
+		this.transition = newTrans;
 	}
 
 	public State sampleTransition(State s, Action a){
