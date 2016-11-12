@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    num_trials = 1000
+    #num_trials = 1000
     
     if not args.epsilon:
         output_file = 'policy_counts.csv'
@@ -37,19 +37,23 @@ if __name__ == '__main__':
 
     count_data = defaultdict(list)
 
+    num_trials = 0
     with open(output_file, 'rb') as inp:
         for line in inp:
             split = line.split(',')
             count_data[float(split[0])] += [int(split[1])]
+            num_trials += 1
                 
     tuples = sorted(list(count_data.iteritems()), key=lambda x: x[0])
     plt.plot([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], 'g--')
     plt.errorbar([x[0] for x in tuples], [np.mean(x[1]) for x in tuples], yerr=1.96*np.array([np.std(x[1]) for x in tuples])*(1/np.sqrt(num_trials)), color='g')
 
-    plt.title('Number of optimal policies vs. Discount Factor', loc='center')
+    
     if not args.epsilon:
+        plt.title('Number of optimal policies vs. Discount Factor', loc='center')
         plt.xlabel('Gamma')
     else:
+        plt.title('Number of optimal policies vs. Exploration', loc='center')
         plt.xlabel('Epsilon')
     plt.ylabel('Number of optimal policies')
     plt.xlim(-0.1,1.1)
