@@ -26,6 +26,11 @@ public class ValueIteration {
 	private final double gamma;
 
 	/**
+	 * The value of beta to use for the Boltzmann operator in GVI
+	 */
+	private final double beta;
+
+	/**
 	 * This map stores the V function.
 	 */
 	private Map<State, Double> V;
@@ -56,9 +61,28 @@ public class ValueIteration {
 	 * @param mdp
 	 * @param gamma
 	 */
-	public ValueIteration(MDP mdp, double gamma) {
+	public ValueIteration(MDP mdp, double gamma, double beta) {
 		this.mdp = mdp;
 		this.gamma = gamma;
+		this.beta = beta;
+		this.V = new HashMap<>();
+		this.Q = HashBasedTable.create();
+		this.P = new HashMap<>();
+		// Initialize the value function to 0.0
+		for (State s : this.mdp.getStates()) {
+			this.V.put(s, 0.0);
+		}
+		for(State s : this.mdp.getStates()){
+			for(Action a : this.mdp.getActions()){
+				this.Q.put(s, a, 0.0);
+			}
+		}
+	}
+
+	public ValueIteration(MDP mdp, double gamma){
+		this.mdp = mdp;
+		this.gamma = gamma;
+		this.beta = 0.0;
 		this.V = new HashMap<>();
 		this.Q = HashBasedTable.create();
 		this.P = new HashMap<>();
@@ -105,6 +129,37 @@ public class ValueIteration {
 //		System.out.println("Number of iters = " + i);
 	}
 
+	public void runQ(){
+		int i = 0;
+		boolean convergence = false;
+		// Convergence criteria are: (1) number of iterations and (2) difference of absolute values.
+		while (i < maxIter && !convergence) {
+			convergence = true;
+			// For each state of the simple.MDP.
+			for (State state : this.mdp.getStates()) {
+				double maxDiff = Double.NEGATIVE_INFINITY;
+				// Compute the value of the action with the highest expected reward.
+				for (Action action : this.mdp.getActions()) {
+					double oldQ = this.Q.get(state, action);
+					this.Q.put(state, action, 0.0);
+					for(State sprime : this.mdp.getStates()) {
+						this.Q.put(state, action, this.Q.get(state, action)
+								+ (this.mdp.getTransition(state, sprime, action) * (this.mdp.getReward(state, sprime, action) + this.gamma * this.boltzmann(sprime))));
+					}
+					if(Math.abs(this.Q.get(state, action) - oldQ) > maxDiff) {
+						maxDiff = this.Q.get(state, action);
+					}
+				}
+				// If the difference between V values is greater than tolerance, then we have not converged.
+				if(convergence && maxDiff > ValueIteration.tolerance){
+					convergence = false;
+				}
+			}
+			i++;
+		}
+//		System.out.println("Finished in " + i + " iterations");
+	}
+
 	/**
 	 * Compute policy induced by the current value function
 	 */
@@ -123,14 +178,57 @@ public class ValueIteration {
 					maxActions.add(a);
 				}
 			}
-			int tie = new Random().nextInt(maxActions.size());
-			this.P.put(s, maxActions.get(tie));
+//			System.out.println(this.Q.row(s));
+			try {
+				int tie = new Random().nextInt(maxActions.size());
+				this.P.put(s, maxActions.get(tie));
+			} catch (IllegalArgumentException e){
+				System.out.println(maxActions);
+				System.out.println(this.Q.row(s));
+			}
 		}
 	}
 
 	public Map<State, Action> getPolicy(){
 	    return this.P;
     }
+
+    public Map<State, Map<Action, Double>> getStochasticPolicy(double temperature){
+		Map<State, Map<Action, Double>> ret = new HashMap<>();
+		for(State s : this.mdp.getStates()){
+			double max = Double.NEGATIVE_INFINITY;
+			for(Action a : this.mdp.getActions()){
+				ret.put(s, new HashMap<>());
+				double val = this.Q.get(s, a) / temperature;
+				ret.get(s).put(a, val);
+				max = Math.max(max, val);
+			}
+
+			double lsum = 0.0;
+			for(Action a : this.mdp.getActions()){
+				lsum += Math.exp(ret.get(s).get(a) - max);
+			}
+			lsum = Math.log(lsum);
+
+			for(Action a : this.mdp.getActions()){
+				ret.get(s).put(a, Math.exp(ret.get(s).get(a) - max - lsum));
+			}
+		}
+		return ret;
+	}
+
+	public double boltzmann(State s){
+    	List<Double> boltzed = new ArrayList<>();
+    	for(Action a : this.mdp.getActions()){
+    		boltzed.add(this.Q.get(s, a) * Math.exp(this.beta * this.Q.get(s, a)));
+		}
+
+		double lnorm = Math.log(this.mdp.getActions().stream().mapToDouble(a -> Math.exp(this.beta * this.Q.get(s, a))).sum());
+
+		double ret = Math.exp(Math.log(boltzed.stream().mapToDouble(i -> i).sum()) - lnorm);
+//		System.out.println(ret);
+		return ret;
+	}
 
 	@Override
 	public String toString() {

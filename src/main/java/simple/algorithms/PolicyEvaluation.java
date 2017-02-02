@@ -1,6 +1,9 @@
 package simple.algorithms;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
+import org.apache.commons.math3.distribution.EnumeratedDistribution;
+import org.apache.commons.math3.util.Pair;
 import simple.MDP.Action;
 import simple.MDP.MDP;
 import simple.MDP.State;
@@ -14,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by dilip on 11/7/16.
@@ -24,6 +28,11 @@ public class PolicyEvaluation {
      * The policy to be evaluated
      */
     private final Map<State, Action> policy;
+
+    /**
+     * The probability distribution representing the stochastic policy to be evaluated
+     */
+    private final Map<State, Map<Action, Double>> stochPolicy;
 
     /**
      * This map stores the V function.
@@ -65,6 +74,7 @@ public class PolicyEvaluation {
         this.gamma = gamma;
         this.policy = policy;
         this.epsilon = 0.0;
+        this.stochPolicy = null;
         this.V = new HashMap<>();
         // Initialize the value function to 0.0
         for (State s : this.mdp.getStates()) {
@@ -76,7 +86,21 @@ public class PolicyEvaluation {
         this.mdp = mdp;
         this.gamma = gamma;
         this.policy = policy;
+        this.stochPolicy = null;
         this.epsilon = epsilon;
+        this.V = new HashMap<>();
+        // Initialize the value function to 0.0
+        for (State s : this.mdp.getStates()) {
+            this.V.put(s, 0.0);
+        }
+    }
+
+    public PolicyEvaluation(MDP mdp, Map<State, Map<Action, Double>> policy){
+        this.mdp = mdp;
+        this.gamma = 0.99;
+        this.epsilon = 0.0;
+        this.stochPolicy = policy;
+        this.policy = null;
         this.V = new HashMap<>();
         // Initialize the value function to 0.0
         for (State s : this.mdp.getStates()) {
@@ -97,11 +121,18 @@ public class PolicyEvaluation {
             for (State state : this.mdp.getStates()) {
                 // Compute the value of the action with the highest expected reward.
                 Action action;
-                if(this.rndg.nextDouble() < this.epsilon){
-                    action = Lists.newArrayList(this.mdp.getActions()).get(this.rndg.nextInt(this.mdp.getActions().size()));
+                if(this.policy != null) {
+                    if (this.rndg.nextDouble() < this.epsilon) {
+                        action = Lists.newArrayList(this.mdp.getActions()).get(this.rndg.nextInt(this.mdp.getActions().size()));
+                    } else {
+                        action = this.policy.get(state);
+                    }
                 }
                 else{
-                    action = this.policy.get(state);
+                    List<Pair<Action, Double>> pmf = this.stochPolicy.get(state).entrySet().stream()
+                            .map(e -> new Pair<>(e.getKey(), e.getValue())).collect(Collectors.toList());
+                    EnumeratedDistribution<Action> actionDistro = new EnumeratedDistribution<>(pmf);
+                    action = actionDistro.sample();
                 }
 
                 double sum = 0.0;

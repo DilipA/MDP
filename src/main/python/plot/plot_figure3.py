@@ -4,7 +4,6 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 from collections import defaultdict
-import scipy.stats as ss
 import matplotlib.pyplot as plt
 
 
@@ -13,23 +12,28 @@ if __name__ == '__main__':
 
     parser.add_argument('--no_parse', action='store_true', help='Skip parsing Grid data files in the current directory')
     parser.add_argument('--epsilon', action='store_true', help='Generate results for epsilon greedy experiments')
+    parser.add_argument('--boltzmann', action='store_true', help='Generate results for Boltzmann action selection experiments')
 
     args = parser.parse_args()
 
     num_samples = 1000
     trajecs = [5, 10, 20, 50]
 
-    if not args.epsilon:
-        output_file = 'figure3_results.csv'
-    else:
+    if args.boltzmann:
+        output_file = 'figure3_boltzmann_results.csv'
+    elif args.epsilon:
         output_file = 'figure3_epsilon_results.csv'
+    else:
+        output_file = 'figure3_gamma_results.csv'
 
     if not args.no_parse:
         onlyfiles = [f for f in listdir('/home/darumuga/') if isfile(join('/home/darumuga/', f))]
-        if not args.epsilon:
-            onlyfiles = [f for f in onlyfiles if 'run_figure3.o' in f]
-        else:
+        if args.boltzmann:
+            onlyfiles = [f for f in onlyfiles if 'run_figure3_beta.o' in f]
+        elif args.epsilon:
             onlyfiles = [f for f in onlyfiles if 'run_figure3_eps.o' in f]
+        else:
+            onlyfiles = [f for f in onlyfiles if 'run_figure3.o' in f]
     
         with open(output_file, 'wb') as out:
             for f in onlyfiles:
@@ -53,12 +57,19 @@ if __name__ == '__main__':
         legend_handles.append(l)
     
     plt.legend(handles=legend_handles, loc=9)
-    if not args.epsilon:
-        plt.title('Planning loss vs. Discount factor', loc='center')
-        plt.xlabel('Gamma')
-    else:
+    if args.boltzmann:
+        plt.title('Planning loss vs. Boltzmann temperature', loc='center')
+        plt.xlabel('Beta')
+    elif args.epsilon:
         plt.title('Planning loss vs. Exploration', loc='center')
         plt.xlabel('Epsilon')
+    else:
+        plt.title('Planning loss vs. Discount factor', loc='center')
+        plt.xlabel('Gamma')
     plt.ylabel('Planning Loss')
-    plt.xlim(-0.1,1.1)
+    
+    if args.boltzmann:
+        plt.xlim(-0.1, 1.0)
+    else:
+        plt.lim(-0.1, 1.1)
     plt.show()
