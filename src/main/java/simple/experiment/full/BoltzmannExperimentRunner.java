@@ -141,26 +141,30 @@ public class BoltzmannExperimentRunner {
 //        temps.add(10.0);
 
         for(Integer n : nVals) {
+//            System.out.println(n);
             List<Trajectory> dataset = DataGenerator.generateNTrajectories(10, n, randomMDP);
             MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
             MDP estimatedMDP = estimator.getMdp();
 
             for (Double temp : temps) {
+//                System.out.println(temp);
                 double betaEval = 10.0;
 
                 ValueIteration vi1 = new ValueIteration(randomMDP, gamma, betaEval);
                 vi1.runQ();
-                vi1.computePolicy();
+//                vi1.computePolicy();
 
-                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, vi1.getPolicy());
+//                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, vi1.getPolicy());
+                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, vi1.getStochasticPolicy());
                 pe1.run();
                 Map<State, Double> v1 = pe1.getValueFunction();
 
                 ValueIteration vi2 = new ValueIteration(estimatedMDP, gamma, temp);
                 vi2.runQ();
-                vi2.computePolicy();
+//                vi2.computePolicy();
 
-                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gamma, vi2.getPolicy());
+//                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gamma, vi2.getPolicy());
+                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, vi2.getStochasticPolicy());
                 pe2.run();
                 Map<State, Double> v2 = pe2.getValueFunction();
 

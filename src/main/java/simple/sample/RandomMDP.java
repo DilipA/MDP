@@ -28,12 +28,12 @@ public class RandomMDP {
 		int numActions = 2;
 		HashSet<State> states = new HashSet<State>();
 		for (int i = 0; i < numStates; i++) {
-			states.add(new State("State # " + i));
+			states.add(new State("State #" + i));
 		}
 		// Create 10 actions.
 		HashSet<Action> actions = new HashSet<Action>();
 		for (int j = 0; j < numActions; j++) {
-			actions.add(new Action("Action # " + j));
+			actions.add(new Action("Action #" + j));
 		}
 		// Create the transition distribution.
 		HashBasedTable<State, Action, Map<State, Double>> transitions = HashBasedTable.create();

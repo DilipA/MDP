@@ -178,14 +178,17 @@ public class ValueIteration {
 					maxActions.add(a);
 				}
 			}
-//			System.out.println(this.Q.row(s));
-			try {
-				int tie = new Random().nextInt(maxActions.size());
-				this.P.put(s, maxActions.get(tie));
-			} catch (IllegalArgumentException e){
-				System.out.println(maxActions);
-				System.out.println(this.Q.row(s));
-			}
+
+//			System.err.println("Q-values: " + this.Q.toString());
+			int tie = new Random().nextInt(maxActions.size());
+			this.P.put(s, maxActions.get(tie));
+//			try {
+//				int tie = new Random().nextInt(maxActions.size());
+//				this.P.put(s, maxActions.get(tie));
+//			} catch (IllegalArgumentException e){
+//				System.out.println(maxActions);
+//				System.out.println(this.Q.row(s));
+//			}
 		}
 	}
 
@@ -193,28 +196,43 @@ public class ValueIteration {
 	    return this.P;
     }
 
-    public Map<State, Map<Action, Double>> getStochasticPolicy(double temperature){
+    public Map<State, Map<Action, Double>> getStochasticPolicy(){
 		Map<State, Map<Action, Double>> ret = new HashMap<>();
 		for(State s : this.mdp.getStates()){
-			double max = Double.NEGATIVE_INFINITY;
+			ret.put(s, new HashMap<>());
 			for(Action a : this.mdp.getActions()){
-				ret.put(s, new HashMap<>());
-				double val = this.Q.get(s, a) / temperature;
-				ret.get(s).put(a, val);
-				max = Math.max(max, val);
+				ret.get(s).put(a, this.Q.get(s,a) * this.beta);
 			}
+		}
 
-			double lsum = 0.0;
-			for(Action a : this.mdp.getActions()){
-				lsum += Math.exp(ret.get(s).get(a) - max);
-			}
-			lsum = Math.log(lsum);
+		double norm = Math.log(ret.values().stream().flatMapToDouble(c -> c.values().stream().mapToDouble(i -> i)).map(Math::exp).sum());
 
+		for(State s : this.mdp.getStates()){
 			for(Action a : this.mdp.getActions()){
-				ret.get(s).put(a, Math.exp(ret.get(s).get(a) - max - lsum));
+				ret.get(s).put(a, Math.exp(ret.get(s).get(a) - norm));
 			}
 		}
 		return ret;
+//		for(State s : this.mdp.getStates()){
+//			double max = Double.NEGATIVE_INFINITY;
+// 				ret.put(s, new HashMap<>());
+//			for(Action a : this.mdp.getActions()){
+//				double val = this.Q.get(s, a) / temperature;
+//				ret.get(s).put(a, val);
+//				max = Math.max(max, val);
+//			}
+//
+//			double lsum = 0.0;
+//			for(Action a : this.mdp.getActions()){
+//				lsum += Math.exp(ret.get(s).get(a) - max);
+//			}
+//			lsum = Math.log(lsum);
+//
+//			for(Action a : this.mdp.getActions()){
+//				ret.get(s).put(a, Math.exp(ret.get(s).get(a) - max - lsum));
+//			}
+//		}
+//		return ret;
 	}
 
 	public double boltzmann(State s){
@@ -226,7 +244,8 @@ public class ValueIteration {
 		double lnorm = Math.log(this.mdp.getActions().stream().mapToDouble(a -> Math.exp(this.beta * this.Q.get(s, a))).sum());
 
 		double ret = Math.exp(Math.log(boltzed.stream().mapToDouble(i -> i).sum()) - lnorm);
-//		System.out.println(ret);
+
+//		System.err.println("Boltzmann operator output: " + ret);
 		return ret;
 	}
 
