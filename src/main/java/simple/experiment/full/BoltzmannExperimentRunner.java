@@ -141,13 +141,13 @@ public class BoltzmannExperimentRunner {
 //        temps.add(10.0);
 
         for(Integer n : nVals) {
-//            System.out.println(n);
+            System.err.println("Running with " + n + " trajectories");
             List<Trajectory> dataset = DataGenerator.generateNTrajectories(10, n, randomMDP);
             MDPEstimator estimator = new MDPEstimator(randomMDP.getStates(), randomMDP.getActions(), dataset);
             MDP estimatedMDP = estimator.getMdp();
 
             for (Double temp : temps) {
-//                System.out.println(temp);
+                System.err.println("Running with Boltzmann temperature " + temp);
                 double betaEval = 10.0;
 
                 ValueIteration vi1 = new ValueIteration(randomMDP, gamma, betaEval);
