@@ -35,15 +35,16 @@ if __name__ == '__main__':
         else:
             onlyfiles = [f for f in onlyfiles if 'run_figure3.o' in f]
 
-        empty_count = 0
+        empty_count = []
         with open(output_file, 'wb') as out:
             for f in onlyfiles:
                 if len(open(f, 'rb').readline()) == 0:
-                    empty_count += 1
+                    empty_count.append(f)
                 with open(f, 'rb') as inp:
                     for line in inp:
                         out.write(line)
-        print 'Failure rate: {0}/{1} = {2}'.format(empty_count, num_samples, float(empty_count) / float(num_samples))
+        print 'Failure rate: {0}/{1} = {2}'.format(len(empty_count), num_samples, float(len(empty_count)) / float(num_samples))
+        print 'Failure files: {0}'.format(empty_count)
 
     data = defaultdict(lambda: defaultdict(list))
     

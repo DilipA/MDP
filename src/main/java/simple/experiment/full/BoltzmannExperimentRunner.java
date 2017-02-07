@@ -163,11 +163,11 @@ public class BoltzmannExperimentRunner {
 
                 ValueIteration vi2 = new ValueIteration(estimatedMDP, gamma, temp);
                 vi2.runQ();
-//                vi2.computePolicy();
+                vi2.computePolicy();
                 System.err.println(vi2.getQ());
 
-//                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gamma, vi2.getPolicy());
-                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, vi2.getStochasticPolicy());
+                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gamma, vi2.getPolicy());
+//                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, vi2.getStochasticPolicy());
                 pe2.run();
                 Map<State, Double> v2 = pe2.getValueFunction();
 
