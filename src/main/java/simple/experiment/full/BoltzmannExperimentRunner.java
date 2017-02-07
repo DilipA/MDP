@@ -112,6 +112,8 @@ public class BoltzmannExperimentRunner {
         Table<Integer, Double, Double> results = HashBasedTable.create();
 
         List<Integer> nVals = new ArrayList<>();
+        nVals.add(1);
+        nVals.add(3);
         nVals.add(5);
         nVals.add(10);
         nVals.add(20);
@@ -121,24 +123,23 @@ public class BoltzmannExperimentRunner {
 
         List<Double> temps = new ArrayList<>();
         temps.add(0.0);
-        temps.add(0.1);
-        temps.add(0.2);
-        temps.add(0.3);
-        temps.add(0.4);
-        temps.add(0.5);
-        temps.add(0.6);
-        temps.add(0.7);
-        temps.add(0.8);
-        temps.add(0.9);
-//        temps.add(0.75);
-//        temps.add(1.0);
-//        temps.add(1.5);
-//        temps.add(2.0);
-//        temps.add(3.0);
-//        temps.add(4.0);
-//        temps.add(5.0);
-//        temps.add(7.0);
-//        temps.add(10.0);
+        temps.add(2.0);
+        temps.add(5.0);
+        temps.add(8.0);
+        temps.add(10.0);
+        temps.add(12.0);
+        temps.add(14.0);
+        temps.add(16.0);
+        temps.add(18.0);
+        temps.add(20.0);
+        temps.add(30.0);
+        temps.add(40.0);
+        temps.add(50.0);
+        temps.add(60.0);
+        temps.add(70.0);
+        temps.add(80.0);
+        temps.add(90.0);
+        temps.add(100.0);
 
         for(Integer n : nVals) {
             System.err.println("Running with " + n + " trajectories");
@@ -148,20 +149,22 @@ public class BoltzmannExperimentRunner {
 
             for (Double temp : temps) {
                 System.err.println("Running with Boltzmann temperature " + temp);
-                double betaEval = 10.0;
+                double betaEval = 100.0;
 
-                ValueIteration vi1 = new ValueIteration(randomMDP, gamma, betaEval);
-                vi1.runQ();
-//                vi1.computePolicy();
+                ValueIteration vi1 = new ValueIteration(randomMDP, gamma);
+                vi1.run();
+                vi1.computePolicy();
+                System.err.println(vi1.getQ());
 
-//                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, vi1.getPolicy());
-                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, vi1.getStochasticPolicy());
+                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, gamma, vi1.getPolicy());
+//                PolicyEvaluation pe1 = new PolicyEvaluation(randomMDP, vi1.getStochasticPolicy());
                 pe1.run();
                 Map<State, Double> v1 = pe1.getValueFunction();
 
                 ValueIteration vi2 = new ValueIteration(estimatedMDP, gamma, temp);
                 vi2.runQ();
 //                vi2.computePolicy();
+                System.err.println(vi2.getQ());
 
 //                PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, gamma, vi2.getPolicy());
                 PolicyEvaluation pe2 = new PolicyEvaluation(randomMDP, vi2.getStochasticPolicy());

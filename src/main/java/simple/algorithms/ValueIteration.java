@@ -79,6 +79,24 @@ public class ValueIteration {
 		}
 	}
 
+	public ValueIteration(MDP mdp, double gamma, double beta, double qInit) {
+		this.mdp = mdp;
+		this.gamma = gamma;
+		this.beta = beta;
+		this.V = new HashMap<>();
+		this.Q = HashBasedTable.create();
+		this.P = new HashMap<>();
+		// Initialize the value function to 0.0
+		for (State s : this.mdp.getStates()) {
+			this.V.put(s, 0.0);
+		}
+		for(State s : this.mdp.getStates()){
+			for(Action a : this.mdp.getActions()){
+				this.Q.put(s, a, qInit);
+			}
+		}
+	}
+
 	public ValueIteration(MDP mdp, double gamma){
 		this.mdp = mdp;
 		this.gamma = gamma;
@@ -129,6 +147,46 @@ public class ValueIteration {
 //		System.out.println("Number of iters = " + i);
 	}
 
+	public Table<State, Action, Double> cloneTable(Table<State, Action, Double> toClone){
+		Table<State, Action, Double> ret = HashBasedTable.create();
+		for(State s : this.mdp.getStates()){
+			for(Action a : this.mdp.getActions()){
+				ret.put(s, a, toClone.get(s, a));
+			}
+		}
+		return ret;
+	}
+
+	public double boltzmannPolicy(State s, Action a, Table<State, Action, Double> qVals){
+		double maxQ = qVals.row(s).values().stream().max(Double::compareTo).get();
+		double numerator = Math.exp(this.beta * (qVals.get(s, a) - maxQ));
+
+		double lnorm = Math.log(this.mdp.getActions().stream().mapToDouble(aprime -> Math.exp(this.beta * (qVals.get(s, aprime) - maxQ))).sum());
+
+		double ret = Math.exp(Math.log(numerator) - lnorm);
+		return ret;
+	}
+
+	public void updateTransitionDynamics(Table<State, Action, Double> qVals){
+		for(State s : this.mdp.getStates()){
+			for(Action a : this.mdp.getActions()){
+				Map<State, Double> newDistro = this.mdp.getDynamics().get(s, a);
+				for(State sprime : this.mdp.getStates()){
+					double boltzProb = this.boltzmannPolicy(s, a, qVals);
+					newDistro.put(sprime, newDistro.get(sprime) * boltzProb);
+				}
+
+				double norm = newDistro.values().stream().mapToDouble(i -> i).sum();
+				if(norm != 1.0){
+					for(State sprime : this.mdp.getStates()){
+						newDistro.put(sprime, newDistro.get(sprime) / norm);
+					}
+				}
+				this.mdp.getDynamics().put(s, a, newDistro);
+			}
+		}
+	}
+
 	public void runQ(){
 		int i = 0;
 		boolean convergence = false;
@@ -136,15 +194,19 @@ public class ValueIteration {
 		while (i < maxIter && !convergence) {
 			convergence = true;
 			// For each state of the simple.MDP.
+			this.updateTransitionDynamics(this.Q);
 			for (State state : this.mdp.getStates()) {
 				double maxDiff = Double.NEGATIVE_INFINITY;
 				// Compute the value of the action with the highest expected reward.
 				for (Action action : this.mdp.getActions()) {
 					double oldQ = this.Q.get(state, action);
+					Table<State, Action, Double> oldQs = cloneTable(this.Q);
 					this.Q.put(state, action, 0.0);
 					for(State sprime : this.mdp.getStates()) {
 						this.Q.put(state, action, this.Q.get(state, action)
-								+ (this.mdp.getTransition(state, sprime, action) * (this.mdp.getReward(state, sprime, action) + this.gamma * this.boltzmann(sprime))));
+//								+ (this.mdp.getTransition(state, sprime, action) * (this.mdp.getReward(state, sprime, action) + this.gamma * this.boltzmann(sprime, oldQs))));
+								+ (this.mdp.getTransition(state, sprime, action) * (this.mdp.getReward(state, sprime, action) + this.gamma * oldQs.row(sprime).values().stream().max(Double::compareTo).get())));
+
 					}
 					if(Math.abs(this.Q.get(state, action) - oldQ) > maxDiff) {
 						maxDiff = this.Q.get(state, action);
@@ -182,13 +244,6 @@ public class ValueIteration {
 //			System.err.println("Q-values: " + this.Q.toString());
 			int tie = new Random().nextInt(maxActions.size());
 			this.P.put(s, maxActions.get(tie));
-//			try {
-//				int tie = new Random().nextInt(maxActions.size());
-//				this.P.put(s, maxActions.get(tie));
-//			} catch (IllegalArgumentException e){
-//				System.out.println(maxActions);
-//				System.out.println(this.Q.row(s));
-//			}
 		}
 	}
 
@@ -196,56 +251,45 @@ public class ValueIteration {
 	    return this.P;
     }
 
+    public Table<State, Action, Double> getQ(){
+		return this.Q;
+	}
+
     public Map<State, Map<Action, Double>> getStochasticPolicy(){
 		Map<State, Map<Action, Double>> ret = new HashMap<>();
 		for(State s : this.mdp.getStates()){
 			ret.put(s, new HashMap<>());
+			double maxQ = this.Q.row(s).values().stream().max(Double::compareTo).get();
 			for(Action a : this.mdp.getActions()){
-				ret.get(s).put(a, this.Q.get(s,a) * this.beta);
+				ret.get(s).put(a, Math.exp(this.beta * (this.Q.get(s, a) - maxQ)));
 			}
 		}
-
-		double norm = Math.log(ret.values().stream().flatMapToDouble(c -> c.values().stream().mapToDouble(i -> i)).map(Math::exp).sum());
+//		System.err.println(ret);
 
 		for(State s : this.mdp.getStates()){
+			double norm = Math.log(ret.get(s).values().stream().mapToDouble(i -> i).sum());
 			for(Action a : this.mdp.getActions()){
-				ret.get(s).put(a, Math.exp(ret.get(s).get(a) - norm));
+				ret.get(s).put(a, Math.exp(Math.log(ret.get(s).get(a)) - norm));
 			}
 		}
+//		System.err.println(ret);
+
 		return ret;
-//		for(State s : this.mdp.getStates()){
-//			double max = Double.NEGATIVE_INFINITY;
-// 				ret.put(s, new HashMap<>());
-//			for(Action a : this.mdp.getActions()){
-//				double val = this.Q.get(s, a) / temperature;
-//				ret.get(s).put(a, val);
-//				max = Math.max(max, val);
-//			}
-//
-//			double lsum = 0.0;
-//			for(Action a : this.mdp.getActions()){
-//				lsum += Math.exp(ret.get(s).get(a) - max);
-//			}
-//			lsum = Math.log(lsum);
-//
-//			for(Action a : this.mdp.getActions()){
-//				ret.get(s).put(a, Math.exp(ret.get(s).get(a) - max - lsum));
-//			}
-//		}
-//		return ret;
 	}
 
-	public double boltzmann(State s){
+	public double boltzmann(State s, Table<State, Action, Double> qVals){
     	List<Double> boltzed = new ArrayList<>();
-    	for(Action a : this.mdp.getActions()){
-    		boltzed.add(this.Q.get(s, a) * Math.exp(this.beta * this.Q.get(s, a)));
+		double maxQ = qVals.row(s).values().stream().max(Double::compareTo).get();
+
+		for(Action a : this.mdp.getActions()){
+    		boltzed.add((qVals.get(s, a) - maxQ) * Math.exp(this.beta * (qVals.get(s, a) - maxQ)));
 		}
 
-		double lnorm = Math.log(this.mdp.getActions().stream().mapToDouble(a -> Math.exp(this.beta * this.Q.get(s, a))).sum());
+		double lnorm = Math.log(this.mdp.getActions().stream().mapToDouble(a -> Math.exp(this.beta * (qVals.get(s, a) - maxQ))).sum());
 
-		double ret = Math.exp(Math.log(boltzed.stream().mapToDouble(i -> i).sum()) - lnorm);
+		double ret = Math.exp(Math.log(boltzed.stream().mapToDouble(i -> i).sum() + maxQ*Math.exp(lnorm)) - lnorm);
 
-//		System.err.println("Boltzmann operator output: " + ret);
+//		System.out.println("Boltzmann operator output: " + ret);
 		return ret;
 	}
 

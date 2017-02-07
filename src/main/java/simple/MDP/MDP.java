@@ -146,6 +146,10 @@ public class MDP {
 		this.transition = newTrans;
 	}
 
+	public Table<State, Action, Map<State, Double>> getDynamics(){
+		return this.transition;
+	}
+
 	public State sampleTransition(State s, Action a){
 		List<Pair<State, Double>> pmf = this.transition.get(s, a).entrySet().stream()
 				.map(e -> new Pair<>(e.getKey(), e.getValue())).collect(Collectors.toList());

@@ -117,7 +117,8 @@ public class MDPEstimator {
 
         for(State s : this.states){
             for(Action a : this.actions){
-                double norm = this.transitionsMean.get(s, a).values().stream().mapToDouble(i -> i).sum();
+//                double norm = this.transitionsMean.get(s, a).values().stream().mapToDouble(i -> i).sum();
+                double norm = this.actions.size();
                 for(State sprime : this.states){
                     this.transitionsMean.get(s, a).put(sprime, this.transitionsMean.get(s, a).get(sprime) / norm);
                 }

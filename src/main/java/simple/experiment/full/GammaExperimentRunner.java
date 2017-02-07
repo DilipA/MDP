@@ -343,6 +343,6 @@ public class GammaExperimentRunner {
     }
 
     public static void main(String[] args) throws MDPException {
-        runPolicyCountGrid();
+        runFigure3Grid();
     }
 }

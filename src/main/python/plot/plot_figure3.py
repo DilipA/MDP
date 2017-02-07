@@ -73,7 +73,7 @@ if __name__ == '__main__':
     plt.ylabel('Planning Loss')
     
     if args.boltzmann:
-        plt.xlim(-0.1, 1.0)
+        plt.xlim(-0.1, 101.0)
     else:
-        plt.lim(-0.1, 1.1)
+        plt.xlim(-0.1, 1.1)
     plt.show()
