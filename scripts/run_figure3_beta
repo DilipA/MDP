@@ -1,0 +1,4 @@
+#!/usr/local/bin/bash
+/course/cs032/bin/jdk1.8.0_25/jre/bin/java -version
+/course/cs032/bin/jdk1.8.0_25/jre/bin/java -Xmx4096M -cp ./MDP.jar simple.experiment.full.BoltzmannExperimentRunner
+
